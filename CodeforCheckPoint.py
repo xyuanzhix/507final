@@ -3,22 +3,26 @@ import json
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.oauth2 import SpotifyOAuth
+import time
 
 scope = "user-library-read"
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+#sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
 CACHE_FILENAME = "cache.json"
 
-CLIENT_ID = 'aab31bf00a434cd8b9c81e1bd4296cad'
-CLIENT_SECRET = '982273bd74c94b1da29111cc561312e5'
+SPOTIFY_CLIENT_ID = 'aab31bf00a434cd8b9c81e1bd4296cad'
+SPOTIFY_SECRET = '982273bd74c94b1da29111cc561312e5'
+client_credentials_manager = SpotifyClientCredentials(
+    client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_SECRET)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 AUTH_URL = 'https://accounts.spotify.com/api/token'
 # POST
 auth_response = requests.post(AUTH_URL, {
     'grant_type': 'client_credentials',
-    'client_id': CLIENT_ID,
-    'client_secret': CLIENT_SECRET,
+    'client_id': SPOTIFY_CLIENT_ID,
+    'client_secret': SPOTIFY_SECRET,
 })
 # convert the response to JSON
 auth_response_data = auth_response.json()
@@ -65,27 +69,21 @@ def save_cache(cache_dict):
     fw.close() 
 
 
-class SpotifyAPI:
-    def __init__(self, name= None, artist_url= None,
-                 top_tracks = [], top_albums= [], 
-                 similar= {}, playlists= {}, 
-                 top_tags= [], top_songs_by_tag = []):
-        client_id = CLIENT_ID
-        client_secret = CLIENT_SECRET
 
-    def getTrackID(playlist_id):
-        id = []
-        play_list = sp.playlist(playlist_id)
-        for item in play_list['tracks']['items']:
-            track = item['track']
-            id.append(track['id'])
-        return id
 
-    def getartistid(id):
-        meta = sp.track(id)
-        artist_id = meta['album']['artists'][0]['id']
-        id = [artist_id]
-        return id
+def SpoTrackID(playlist_id):
+    id = []
+    play_list = sp.playlist(playlist_id)
+    for item in play_list['tracks']['items']:
+        track = item['track']
+        id.append(track['id'])
+    return id
+
+def SpoArtistid(id):
+    meta = sp.track(id)
+    artist_id = meta['album']['artists'][0]['id']
+    id = [artist_id]
+    return id
 
 def make_url_request_using_cache(url, cache, search_header=None):
     ''' checkes if the information is in cache
@@ -118,7 +116,23 @@ def make_url_request_using_cache(url, cache, search_header=None):
             save_cache(cache)        
             return cache[url]
 
+def search(self, query, search_type = 'artist'):
+    r = requests.get(SPOTIFY_BASE + 'search/' + 'artists/' + '5t5FqBwTcgKTaWmfEbwQY9' + '/albums', 
+                 headers=headers, 
+                 params={'q': {query}, 'type': {search_type}})
+    return r.json()
 
+if __name__ == '__main__':
 
+    #print(SpoTrackID('df'))
 
-#if __name__ == '__main__':
+    query = sp.search("ENHYPEN")
+    print(query)
+    with open('result.json', 'w') as f:
+        json.dump(query, f)
+    # r = requests.get(SPOTIFY_BASE + 'artists/' + {query['id']} + '/albums', 
+    #              headers=headers, 
+    #              params={'include_groups': 'album', 'limit': 50})
+    # d = r.json()
+    # for album in d['items']:
+    #     print(album['name'], ' --- ', album['release_date'])
