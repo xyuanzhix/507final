@@ -70,33 +70,7 @@ def save_cache(cache_dict):
 
 
 
-
-def SpoTrackID(playlist_id):
-    id = []
-    play_list = sp.playlist(playlist_id)
-    for item in play_list['tracks']['items']:
-        track = item['track']
-        id.append(track['id'])
-    return id
-
-def SpoArtistid(id):
-    meta = sp.track(id)
-    artist_id = meta['album']['artists'][0]['id']
-    id = [artist_id]
-    return id
-
-def make_url_request_using_cache(url, cache, search_header=None):
-    ''' checkes if the information is in cache
-    Parameters
-    ----------
-    url: str
-        the url of the request being made
-    cache: json
-        the json file to search and see if url call has been made previously
-    Returns
-    -------
-    None
-    '''    
+def Search_cache(url, cache, search_header=None)   
     if (url in cache.keys()):         
         print("Using cache")        
         return cache[url]   
